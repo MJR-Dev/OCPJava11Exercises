@@ -1,0 +1,151 @@
+Java 11 certfication Preparation:
+identifier starting with _ - expression :: changed in v11.
+
+javac -d build src/...class : this command creates the .class in the folder, using package mentioned after 'build' in the command.
+
+javac -d {directory} <javaclass.java>
+
+===============================
+Packages & Imports:
+-> difference between static import and normal import
+
+higher priority will be given to the more specific import and then generic one if there are 2 classes with the same name in both packages.
+
+import static : this will import the static class attributes/methods not the class
+
+we can create classes with names as found in Java source code. For ex, we can create a class 'Number' which is different from java.lang.Number.
+so when creating:
+package a;
+//import java.lang.Number; - this will create compiler error as it creates ambiguity.
+class Number {}
+
+if we are importing two classes with same static variable member names, then the more specific static import will be counted and the generic one wil be ignored.
+For eg, 
+package a;
+class StaticImportTest1 { public static final String APP_NAME = "first"; }
+class StaticImportTest2 { public static final String APP_NAME = "second"; }
+package f;
+import static a.StaticImportTest1.*;
+import static a.StaticImportTest2.APP_NAME;
+class test{ sysout(APP_NAME); } -> Here APP_NAME will be printed as "second".
+==============================
+Primitive Data Types:
+---------------------
+8 primitive data type
+byte - 8 bits - 1 byte
+boolean - 1 bit 
+short - 16 bit
+int - 32-bit
+long - 64-bit
+float - single precision 32-bit
+double - double precision 64-bit
+char - 16-bit unicode character - starting with '\u' followed by a 4-digit number
+
+valid literals are numeric values in base ten, hexadecimal and octal forms.
+numeric - int, short, long, float, double 
+
+binary - base 2 - 0b
+octal - base 8 - 0[prefix]
+decimal - base 10 - no prefix
+hexadecimal - base 16 - 0x[prefix]
+
+Narrowing & Widening:
+----------------------
+byte ->short ->int ->long ->float ->double 
+implicit conversion happens from left to right. but from right to left required explicit casting.
+type of conversions: Implcit, Explicit, Boolean
+Implicit is done by JVM [ widening ] - assigning shorter data type to larger data type
+Explicit is done by the user. type casting [ narrowing ] - assigning larger data type to shorter data type.
+boolean conversion can only be between two boolean values not any other data type.
+Underscores cannot be kept before start of literal, end of literal, before/after decimalpoint, before/ after suffix/prefix.
+Every numeric lieral with a decimal is double by default.
+every numeric literal that does not contain a decimal is a 32-bit int.
+
+Default values assigned to Class Static Variables and Instance Variables are default values and are same for both.
+local variable, if not initialized, gives compiler error.
+partial initialization also leads to compiler error. For eg, variable initialized in an if block without else, initilaized in a switch cases but not default case. 
+If the condition in 'if' is known at compile time i.e. static value like 'if(true)', then it will not give any compiler error.
+in case of a do-while loop, it doesnt give error as its executed atleast once so the variable is initialized.
+in case of while,for loop, similar to if loop, if the condition is known at compile time, i.e. static value like 'true', this doesnt give any error.
+
+for eg, 
+float f1 = 0.0;
+byte b1 = 0.0;
+char c1=0.0;
+short s1=0.0;
+int i1=0.0;
+long l1=0.0;
+all the above gives compiler error coz by default, 0.0 is considered double and double is never implicitly narrowed by the JVM.
+
+conversion from byte -> char, char -> short, short -> char :: 
+for eg, byte b1 = 'a';
+char c1 = b1;
+short s1 = c1;
+c1=s1;
+This gives compilation error because it combines both widening and narrowing primitive conversions. when converting byte->char, it internally converts byte to int using widening primitive conversion. then the resulting int is converted to char. this does not work for variables coz compiler doesnt have enoug info to determine if the narrowing is ok.
+In java both char → short and short → char ,types of implicit type casting is not possible because char has a range from 0 to 65535(UTF-16) and byte from -32768 to 32767. So char cannot take values which are negative so short → char implicit type casting is not possible.
+Similarly short cannot take values beyond +ve 32767 so char → short type casting is also not possible.
+short and char are the same width but char is unsigned so conversion is not allowed.
+
+Casting:
+----------
+widening - value intact
+narrowing - loss of precision/data
+problem happens when the value does not fall into the valid value range. This leads to underflow/overlow. For eg, happens when the min value/max value is decreased/increased by 1 for a data type.
+underflow is defining/casting a value less than the min range of a data type.
+overflow is defining/casting a value greater than the max range of a data type.
+for eg,
+int loopIter=0
+int minVal = Short.MIN_VALUE; //-32768
+int maxVal = Short.MAX_VALUE; //32767
+for(int i=minVal; i<maxVal;i++){
+s2 = (short)i;
+if(i==minVal) sysout("min short val"+i);
+if(i==maxVal) sysout("max short val:"+i);
+callMethod((loopIter+1),s2);
+loopIter++;
+} sysout("loopIter:"+loopIter);
+callMethod(int i, short s){
+if(s==Short.MAX_VALUE) sysout("Iteration:"+i+" has the max value, my type is short");
+}
+In the above code, if minVal=Short.MIN_VALUE-1; maxVal=Short.MAX_VALUE+1;
+The minVal is overflowing case, as the minVal=32767[which is max value for Short], maxVal=-32768[which is min value for Short]
+long/float assigned to int, will truncate the value to whole number.[123.456f -> 123]
+
+1. Literals with decimal points default to double , not float.
+2. floats and doubles do not overflow, since they are approximated
+3. local variable primitives are not initialized
+4. class static and instance variables are initialized
+5. null is not a valid value for primitive data types.
+
+i+++j - operator precedence - i++ [postfix] has higher precedence.
+
+Scope:
+------------------
+several scopes : 
+class : {DefinedClassType}
+Instance :  this
+method :  none
+loop : none
+loop block: none
+block including exception block : none
+
+an inner class has an IMPLIED qualifier reference to the outer class object and its attributes and methods.
+
+Java 10 : new feature introduced : local variable type inference: what it is:
+- a shortcut to reduce verbosity of code
+what it is not:
+- a data type, the data type must be able to be inferred by compiler when using it.
+- a keyword, you can actually use the text 'var' as an identifier.
+'var' is not a type, its short hand.
+it can only be used inside methods for local variables and the type of variable on right side of the equation should be inferable by the compiler, to avoid compiler errors.
+Reference link from Oracle website:
+https://developer.oracle.com/java/jdk-10-local-variable-type-inference.html
+
+
+
+
+
+
+
+
